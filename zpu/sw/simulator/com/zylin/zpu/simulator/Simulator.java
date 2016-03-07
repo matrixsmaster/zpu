@@ -613,6 +613,7 @@ public class Simulator implements ZPU, Machine, Sim
 		setPc(VECTORSIZE*vector+VECTORBASE);
 	}
 
+	private int my_ino = 0;
 	private void executeInstruction() throws CPUException, EndSessionException, GDBServerException, IOException
 	{
         for (;;)
@@ -640,6 +641,9 @@ public class Simulator implements ZPU, Machine, Sim
             // electrons perish each time we attempt an instruction
             tick();
             
+            System.err.println(my_ino+"\tPC: 0x"+Integer.toHexString(pc)+"  SP: 0x"+Integer.toHexString(getSp())+" [0x"+Integer.toHexString(cpuReadLong(getSp()))+"]  Inst 0x"+Integer.toHexString(instruction));
+            my_ino++;
+            
             if (((instruction&0x80)!=0))
             {
                 int t=((instruction<<(32-7)))>>(32-7);
@@ -649,9 +653,11 @@ public class Simulator implements ZPU, Machine, Sim
                     int a;
                     a=(popIntStack()<<7)|(t&0x7f);
                     pushIntStack(a);
+//                    System.out.println("IM: inst: 0x"+Integer.toHexString(instruction)+"  next  0x"+Integer.toHexString(a));
                 } else
                 {
                     pushIntStack(t);
+//                    System.out.println("IM: inst: 0x"+Integer.toHexString(instruction)+"  first  0x"+Integer.toHexString(t));
                 }
                 decodeMask=true;
             } else
@@ -1092,14 +1098,16 @@ public class Simulator implements ZPU, Machine, Sim
                         {
                             emulate();
                             cpu=ABEL;
+//                            System.err.println("CPU set to Abel");
                         } else
                         {
                             cpu = popIntStack();
+//                            System.err.println("CPU code got from stack");
                         }
                         switch (cpu)
                         {
                         case ABEL:
-                            System.err.println("ZPU feeble instruction set");
+//                            System.err.println("ZPU feeble instruction set");
                             for (int i = 0; i < feeble.length; i++)
                             {
                                 feeble[i] = true;
@@ -1109,7 +1117,7 @@ public class Simulator implements ZPU, Machine, Sim
                             
                             break;
                         case ZETA:
-                            System.err.println("ZPU full instruction set");
+//                            System.err.println("ZPU full instruction set");
                             for (int i = 0; i < feeble.length; i++)
                             {
                                 feeble[i] = false;
